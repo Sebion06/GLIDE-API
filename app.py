@@ -27,16 +27,10 @@ def init():
 def home():
     return render_template('index.html')
 
-@app.route('/generate',methods=['POST'])
+@app.route('/generate',methods=['POST, GET'])
 def generate():
 
-    int_features = [int(x) for x in request.form.values()]
-    final_features = [np.array(int_features)]
-    prediction = model.predict(final_features)
-
-    output = round(prediction[0], 2)
-
-    return render_template('index.html', prediction_image='Sales should be $ {}'.format(output))
+    return render_template('index.html', prediction_image='{}'.format(output))
 
 @app.route('/results',methods=['POST'])
 def results():
