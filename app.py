@@ -1,7 +1,7 @@
 import numpy as np
 from flask import Flask, request, session, redirect, url_for, jsonify, render_template
 import pickle, torch
-import script
+import glide_api
 
 app = Flask(__name__, template_folder='template', static_folder='static')
 app.secret_key = "super secret key"
@@ -27,8 +27,8 @@ def home():
         upsample_temp = request.form["upsample_temp"]
         base_diffusion_steps = request.form["base_diffusion_steps"]
         upsampler_diffusion_steps = request.form["upsampler_diffusion_steps"]
-        base_model, base_options, base_diffusion = script.create_base_model(base_diffusion_steps)
-        upsample_model, upsample_options, upsample_diffusion = script.create_upsampler_model(upsampler_diffusion_steps)
+        base_model, base_options, base_diffusion = glide_api.create_base_model(base_diffusion_steps)
+        upsample_model, upsample_options, upsample_diffusion = glide_api.create_upsampler_model(upsampler_diffusion_steps)
 
         return redirect(url_for('generate', 
         batch_size=batch_size, guidance_scale=guidance_scale,upsample_temp=upsample_temp))
@@ -55,12 +55,12 @@ def generate():
         print(batch_size)
 
 
-        base_model_kwargs = script.create_base_model_kwargs(base_model, base_options, text_input, batch_size)
+        base_model_kwargs = glide_api.create_base_model_kwargs(base_model, base_options, text_input, batch_size)
         base_model.del_cache()
-        base_sample = script.get_base_sample(base_model_kwargs, base_options, base_diffusion, batch_size, full_batch_size)
+        base_sample = glide_api.get_base_sample(base_model_kwargs, base_options, base_diffusion, batch_size, full_batch_size)
         base_model.del_cache()
     
-        img_path = script.save_images(text_input, base_sample)
+        img_path = glide_api.save_images(text_input, base_sample)
 
         return render_template('generate.html', prediction_image=img_path)
     return render_template('generate.html')
