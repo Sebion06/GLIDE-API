@@ -12,8 +12,11 @@ from glide_text2im.model_creation import (
 
 has_cuda = th.cuda.is_available()
 device = th.device('cpu' if not has_cuda else 'cuda')
+model = None
+guidance_scale = 3.0
 
 def create_base_model(diffusion_steps):
+    global model
     options = model_and_diffusion_defaults()
     options['use_fp16'] = has_cuda
     options['timestep_respacing'] = diffusion_steps # use 100 diffusion steps for fast sampling
@@ -44,7 +47,7 @@ def create_upsampler_model(diffusion_steps):
 def model_fn(x_t, ts, **kwargs):
     half = x_t[: len(x_t) // 2]
     combined = th.cat([half, half], dim=0)
-    model_out = base_model(combined, ts, **kwargs)
+    model_out = model(combined, ts, **kwargs)
     eps, rest = model_out[:, :3], model_out[:, 3:]
     cond_eps, uncond_eps = th.split(eps, len(eps) // 2, dim=0)
     half_eps = uncond_eps + guidance_scale * (cond_eps - uncond_eps)
@@ -59,15 +62,16 @@ def save_images(prompt, batch: th.Tensor):
     image = Image.fromarray(reshaped.numpy())
     prompt = prompt.replace(" ", "_")
     count = 1
-    file_path = f"samples2/{prompt}.png"
+    file_path = f"static/{prompt}.png"
     while os.path.exists(file_path) is True:
-        file_path = f"samples2/{prompt}{count}.png"
+        file_path = f"static/{prompt}{count}.png"
         count += 1
     image.save(file_path)
     display(image)
+    return file_path
 
 
-def create_base_model_kwargs(base_options, prompt, batch_size=1):
+def create_base_model_kwargs(base_model, base_options, prompt, batch_size=1):
     tokens = base_model.tokenizer.encode(prompt)
     tokens, mask = base_model.tokenizer.padded_tokens_and_mask(
         tokens, base_options['text_ctx']
@@ -145,7 +149,6 @@ def main():
     batch_size = 1
     guidance_scale = 3.0
     full_batch_size = batch_size * 2
-
     upsample_temp = 0.997
     base_diffusion_steps = '100'
     umsampler_diffusion_steps = 'fast27'
@@ -154,7 +157,7 @@ def main():
     upsample_model, upsample_options, upsample_diffusion = create_upsampler_model(umsampler_diffusion_steps)
 
 
-    base_model_kwargs = create_base_model_kwargs(base_options, prompt, batch_size)
+    base_model_kwargs = create_base_model_kwargs(base_model, base_options, prompt, batch_size)
     base_model.del_cache()
     base_sample = get_base_sample(base_model_kwargs, base_options, base_diffusion, batch_size, full_batch_size)
     base_model.del_cache()
@@ -168,5 +171,5 @@ def main():
 
     save_images(prompt, up_sample)
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

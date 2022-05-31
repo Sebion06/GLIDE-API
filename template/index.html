@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>Deployment Tutorial 1</title>
+  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="css/style.css">
+  
+</head>
+
+<body>
+ <div>
+	<h1>Create models</h1>
+
+    <form action="{{ url_for('home')}}"method="post">
+    	<input type="text" name="batch_size" placeholder="batch_size" required="required" />
+      <input type="text" name="guidance_scale" placeholder="guidance_scale" required="required" />
+      <input type="text" name="upsample_temp" placeholder="upsample_temp" required="required" />
+      <input type="text" name="base_diffusion_steps" placeholder="base_diffusion_steps" required="required" />
+      <input type="text" name="upsampler_diffusion_steps" placeholder="upsampler_diffusion_steps" required="required" />
+      
+      <button type="submit" class="btn btn-primary btn-block btn-large">Create models</button>
+    </form>
+
+ </div>
+</body>
+</html>

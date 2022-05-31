@@ -13,20 +13,17 @@
 </head>
 
 <body>
- <div class="login">
+ <div">
 	<h1>Icon Generation</h1>
 
-     <!-- Main Input For Receiving Query to our ML -->
-    <form action="{{ url_for('predict')}}"method="post">
+    <form action="{{ url_for('generate')}}"method="post">
     	<input type="text" name="text_input" placeholder="Text as input" required="required" />
-        <input type="text" name="diffusion_steps" placeholder="Diffusion steps" required="required" />
-		<!--<input type="text" name="sales in second month" placeholder="sales in second month" required="required" /> -->
         <button type="submit" class="btn btn-primary btn-block btn-large">Generate icon</button>
     </form>
-
+    
    <br>
    <br>
-   {{ prediction_image }}
+   <img src="{{ prediction_image | safe }}"/>
 
  </div>
 </body>
