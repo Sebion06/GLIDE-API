@@ -17,14 +17,28 @@
 	<h1>Icon Generation</h1>
 
     <form action="{{ url_for('generate')}}"method="post">
-    	<input type="text" name="text_input" placeholder="Text as input" required="required" />
+    	<input type="text" name="icon_text_input" placeholder="Text as input" />
         <button type="submit" class="btn btn-primary btn-block btn-large">Generate icon</button>
     </form>
     
    <br>
    <br>
-   <img src="{{ prediction_image | safe }}"/>
+   <img src="{{ icon_image | safe }}"/>
 
  </div>
+ <div">
+	<h1>Background Generation</h1>
+
+    <form action="{{ url_for('generate')}}"method="post">
+    	<input type="text" name="background_text_input" placeholder="Text as input"/>
+        <button type="submit" class="btn btn-primary btn-block btn-large">Generate background</button>
+    </form>
+    
+   <br>
+   <br>
+   <img src="{{ background_image | safe }}"/>
+
+ </div>
+
 </body>
 </html>

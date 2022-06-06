@@ -10,6 +10,7 @@ from glide_text2im.model_creation import (
     model_and_diffusion_defaults_upsampler
 )
 
+
 has_cuda = th.cuda.is_available()
 device = th.device('cpu' if not has_cuda else 'cuda')
 model = None
@@ -126,9 +127,9 @@ def create_upsampler_model_kwargs(sample, upsample_model, upsample_options, prom
     return model_kwargs
 
 
-def get_upsampled_sample(up_model_kwargs, upsample_model, upsample_options, upsample_diffusion, batch_size, upsample_temp):
+def get_upsampled_sample(up_model_kwargs, upsample_model, upsample_options, upsample_diffusion, batch_size, upsample_temp, image_size):
     upsample_model.del_cache()
-    up_shape = (batch_size, 3, upsample_options["image_size"], upsample_options["image_size"])
+    up_shape = (batch_size, 3, image_size, image_size)
     up_samples = upsample_diffusion.ddim_sample_loop(
         upsample_model,
         up_shape,
