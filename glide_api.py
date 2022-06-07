@@ -3,6 +3,7 @@ from PIL import Image
 from IPython.display import display
 import torch as th
 import os
+import base64
 from glide_text2im.download import load_checkpoint
 from glide_text2im.model_creation import (
     create_model_and_diffusion,
@@ -46,6 +47,7 @@ def create_upsampler_model(diffusion_steps):
 
 
 def model_fn(x_t, ts, **kwargs):
+    global guidance_scale
     half = x_t[: len(x_t) // 2]
     combined = th.cat([half, half], dim=0)
     model_out = model(combined, ts, **kwargs)
@@ -56,7 +58,7 @@ def model_fn(x_t, ts, **kwargs):
     return th.cat([eps, rest], dim=1)
 
 
-def save_images(prompt, batch: th.Tensor):
+def encode_image(prompt, batch: th.Tensor):
     """ Display a batch of images inline. """
     scaled = ((batch + 1)*127.5).round().clamp(0,255).to(th.uint8).cpu()
     reshaped = scaled.permute(2, 0, 3, 1).reshape([batch.shape[2], -1, 3])
@@ -68,8 +70,14 @@ def save_images(prompt, batch: th.Tensor):
         file_path = f"static/{prompt}{count}.png"
         count += 1
     image.save(file_path)
-    display(image)
-    return file_path
+    # display(image)
+    # return file_path
+    with open(file_path, "rb") as image_file:
+        encoded_img = base64.b64encode(image_file.read())
+    if os.path.isfile(file_path) is True:
+        os.remove(file_path)
+    encoded_string = encoded_img.decode('utf-8')
+    return encoded_string
 
 
 def create_base_model_kwargs(base_model, base_options, prompt, batch_size=1):
@@ -95,7 +103,9 @@ def create_base_model_kwargs(base_model, base_options, prompt, batch_size=1):
     return model_kwargs
 
 
-def get_base_sample(base_model_kwargs, base_options, base_diffusion, batch_size=1, full_batch_size=2):
+def get_base_sample(base_model_kwargs, base_options, base_diffusion, g_scale, batch_size=1, full_batch_size=2):
+    global guidance_scale
+    guidance_scale = g_scale
     samples = base_diffusion.p_sample_loop(
         model_fn,
         (full_batch_size, 3, base_options["image_size"], base_options["image_size"]),
@@ -141,36 +151,3 @@ def get_upsampled_sample(up_model_kwargs, upsample_model, upsample_options, upsa
         cond_fn=None,
     )[:batch_size]
     return up_samples
-
-
-def main():
-    global guidance_scale
-    global base_model
-    prompt = "an oil painting of a corgi"
-    batch_size = 1
-    guidance_scale = 3.0
-    full_batch_size = batch_size * 2
-    upsample_temp = 0.997
-    base_diffusion_steps = '100'
-    umsampler_diffusion_steps = 'fast27'
-
-    base_model, base_options, base_diffusion = create_base_model(base_diffusion_steps)
-    upsample_model, upsample_options, upsample_diffusion = create_upsampler_model(umsampler_diffusion_steps)
-
-
-    base_model_kwargs = create_base_model_kwargs(base_model, base_options, prompt, batch_size)
-    base_model.del_cache()
-    base_sample = get_base_sample(base_model_kwargs, base_options, base_diffusion, batch_size, full_batch_size)
-    base_model.del_cache()
-    
-    save_images(prompt, base_sample)
-
-    up_model_kwargs = create_upsampler_model_kwargs(base_sample, upsample_model, upsample_options, prompt, batch_size)
-    upsample_model.del_cache()
-    up_sample = get_upsampled_sample(up_model_kwargs, upsample_model, upsample_options, upsample_diffusion, batch_size, upsample_temp)
-    upsample_model.del_cache()
-
-    save_images(prompt, up_sample)
-
-# if __name__ == '__main__':
-#     main()
