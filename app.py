@@ -1,10 +1,17 @@
-from flask import Flask, request, session, jsonify, abort
-from flask_restful import Api, Resource, reqparse
-from marshmallow import Schema, fields, post_load, validates, ValidationError
-from time import process_time
+import os
 import torch
 import glide_api
+from time import process_time
+from flask import Flask, request, session, jsonify, abort, redirect, render_template, url_for
+from flask_restful import Api, Resource
+from marshmallow import Schema, fields, post_load, validates, ValidationError
 
+base_model, base_options, base_diffusion = glide_api.create_base_model('10')
+upsample_model, upsample_options, upsample_diffusion = glide_api.create_upsampler_model('fast27')
+
+app = Flask(__name__, template_folder='template', static_folder='static')
+api = Api(app)
+app.secret_key = os.urandom(12)
 
 class ImageSchema(Schema):
     prompt = fields.Str(required=True)
@@ -106,16 +113,57 @@ def get_up_sample(text_input, sample, batch_size, upsample_temp, size):
     return up_sample
 
 
+@app.route('/', methods=['POST', 'GET'])
+def home():
+    global base_model, base_options, base_diffusion
+    global upsample_model, upsample_options, upsample_diffusion
 
-base_model, base_options, base_diffusion = glide_api.create_base_model('10')
-upsample_model, upsample_options, upsample_diffusion = glide_api.create_upsampler_model('fast27')
+    if request.method == 'POST':
+        batch_size = request.form["batch_size"]
+        guidance_scale = request.form["guidance_scale"]
+        upsample_temp = request.form["upsample_temp"]
+        base_diffusion_steps = request.form["base_diffusion_steps"]
+        upsampler_diffusion_steps = request.form["upsampler_diffusion_steps"]
+        base_model, base_options, base_diffusion = glide_api.create_base_model(base_diffusion_steps)
+        upsample_model, upsample_options, upsample_diffusion = glide_api.create_upsampler_model(upsampler_diffusion_steps)
 
-app = Flask(__name__, template_folder='template', static_folder='static')
-api = Api(app)
+        return redirect(url_for('generate', 
+        batch_size=batch_size, guidance_scale=guidance_scale,upsample_temp=upsample_temp))
+    return render_template('index.html')
+
+
+@app.route('/generate',methods=['POST', 'GET'])
+def generate():
+    if request.method == 'GET':
+        session['batch_size'] = request.args.get('batch_size', None)
+        session['guidance_scale'] = request.args.get('guidance_scale', None)
+        session['upsample_temp'] = request.args.get('upsample_temp', None)
+        
+    batch_size =  int(session.get('batch_size'))
+    guidance_scale =  float(session.get('guidance_scale'))
+    upsample_temp =  float(session.get('upsample_temp'))
+
+    if request.method == 'POST':
+        icon_text_input = request.form.get("icon_text_input")
+        background_text_input = request.form.get("background_text_input")
+        if icon_text_input is not None:
+            base_sample = get_base_sample(icon_text_input, batch_size, guidance_scale)
+            img_path = glide_api.save_images(icon_text_input, base_sample)
+            return render_template('generate.html', icon_image=img_path)
+
+        if background_text_input is not None:
+            base_sample = get_base_sample(background_text_input, batch_size, guidance_scale)
+            up_sample = get_up_sample(background_text_input, base_sample, batch_size, upsample_temp, 256)
+            final_sample = get_up_sample(background_text_input, up_sample, batch_size, upsample_temp, 512)
+            img_path = glide_api.save_images(background_text_input, final_sample)
+            return render_template('generate.html', background_image=img_path)
+    return render_template('generate.html')
+
 
 api.add_resource(Image, "/image")
 api.add_resource(BaseModel, "/basemodel")
 api.add_resource(UpModel, "/upmodel")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

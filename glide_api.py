@@ -1,9 +1,8 @@
 
-from PIL import Image
-from IPython.display import display
-import torch as th
 import os
 import base64
+import torch as th
+from PIL import Image
 from glide_text2im.download import load_checkpoint
 from glide_text2im.model_creation import (
     create_model_and_diffusion,
@@ -58,8 +57,17 @@ def model_fn(x_t, ts, **kwargs):
     return th.cat([eps, rest], dim=1)
 
 
-def encode_image(prompt, batch: th.Tensor):
-    """ Display a batch of images inline. """
+def encode_image(prompt, sample):
+    file_path = save_images(prompt, sample)
+    with open(file_path, "rb") as image_file:
+        encoded_img = base64.b64encode(image_file.read())
+    if os.path.isfile(file_path) is True:
+        os.remove(file_path)
+    encoded_string = encoded_img.decode('utf-8')
+    return encoded_string
+
+
+def save_images(prompt, batch: th.Tensor):
     scaled = ((batch + 1)*127.5).round().clamp(0,255).to(th.uint8).cpu()
     reshaped = scaled.permute(2, 0, 3, 1).reshape([batch.shape[2], -1, 3])
     image = Image.fromarray(reshaped.numpy())
@@ -70,14 +78,7 @@ def encode_image(prompt, batch: th.Tensor):
         file_path = f"static/{prompt}{count}.png"
         count += 1
     image.save(file_path)
-    # display(image)
-    # return file_path
-    with open(file_path, "rb") as image_file:
-        encoded_img = base64.b64encode(image_file.read())
-    if os.path.isfile(file_path) is True:
-        os.remove(file_path)
-    encoded_string = encoded_img.decode('utf-8')
-    return encoded_string
+    return file_path
 
 
 def create_base_model_kwargs(base_model, base_options, prompt, batch_size=1):
