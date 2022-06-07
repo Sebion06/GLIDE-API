@@ -21,7 +21,7 @@ def create_base_model(diffusion_steps):
     global model
     options = model_and_diffusion_defaults()
     options['use_fp16'] = has_cuda
-    options['timestep_respacing'] = diffusion_steps # use 100 diffusion steps for fast sampling
+    options['timestep_respacing'] = diffusion_steps
     model, diffusion = create_model_and_diffusion(**options)
     model.eval()
     if has_cuda:
@@ -35,7 +35,7 @@ def create_base_model(diffusion_steps):
 def create_upsampler_model(diffusion_steps):
     options_up = model_and_diffusion_defaults_upsampler()
     options_up['use_fp16'] = has_cuda
-    options_up['timestep_respacing'] = diffusion_steps #'fast27' # use 27 diffusion steps for very fast sampling
+    options_up['timestep_respacing'] = diffusion_steps
     model_up, diffusion_up = create_model_and_diffusion(**options_up)
     model_up.eval()
     if has_cuda:
