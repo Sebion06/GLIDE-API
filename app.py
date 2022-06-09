@@ -6,7 +6,7 @@ from flask import Flask, request, session, jsonify, abort, redirect, render_temp
 from flask_restful import Api, Resource
 from marshmallow import Schema, fields, post_load, validates, ValidationError
 
-base_model, base_options, base_diffusion = glide_api.create_base_model('10')
+base_model, base_options, base_diffusion = glide_api.create_base_model('100')
 upsample_model, upsample_options, upsample_diffusion = glide_api.create_upsampler_model('fast27')
 
 app = Flask(__name__, template_folder='template', static_folder='static')
@@ -20,10 +20,14 @@ class ImageSchema(Schema):
     guidance_scale = fields.Float(required=False, load_default=3.0)
     upsample_temp = fields.Float(required=False, load_default=0.997)
 
+    def is_power_of_two(self, x):
+        return (x and (not(x & (x - 1))) )
+
     @validates('size')
     def validate_size(self, size):
-        if size % 64 != 0:
-            raise ValidationError("Size should be divisible by 64")
+        if size < 64 and not self.is_power_of_two(size):
+            raise ValidationError("Size should be 64 or bigger and a power of 2")
+
 
     @validates('upsample_temp')
     def validate_upsample_temp(self, upsample_temp):
@@ -166,4 +170,4 @@ api.add_resource(UpModel, "/upmodel")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="127.0.0.1", port=5000)
