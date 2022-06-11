@@ -73,6 +73,8 @@ def save_images(prompt, batch: th.Tensor):
     image = Image.fromarray(reshaped.numpy())
     prompt = prompt.replace(" ", "_")
     count = 1
+    if not  os.path.exists("static"):
+        os.makedirs("static")
     file_path = f"static/{prompt}.png"
     while os.path.exists(file_path) is True:
         file_path = f"static/{prompt}{count}.png"

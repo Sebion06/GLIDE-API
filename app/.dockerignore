@@ -1,0 +1,4 @@
+Dockerfile
+__pycache__
+.pytest_cache
+glide_model_cache

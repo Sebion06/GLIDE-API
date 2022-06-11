@@ -71,8 +71,8 @@ class Image(Resource):
         return jsonify( data_type="image/png;base64",
                         image_size=args["size"],
                         image=encoded_image,
-                        memory_allocated=f"{allocated_memory:.2f} Gb",
-                        memory_reserved=f"{reserved_memory:.2f} Gb",
+                        gpu_memory_allocated=f"{allocated_memory:.2f} Gb",
+                        gpu_memory_reserved=f"{reserved_memory:.2f} Gb",
                         processing_time = f"{processing_time} s" )
 
 
@@ -170,4 +170,4 @@ api.add_resource(UpModel, "/upmodel")
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)
