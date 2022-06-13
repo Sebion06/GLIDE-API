@@ -14,7 +14,7 @@ RUN pip3 install --no-cache-dir \
             marshmallow==3.16.0 \
             Pillow==9.1.1 \
             gunicorn==20.1.0 \
-            torch==1.11.0 --extra-index-url https://download.pytorch.org/whl/cu113\
+            torch==1.11.0  \
             git+https://github.com/openai/glide-text2im
 
 EXPOSE 5000

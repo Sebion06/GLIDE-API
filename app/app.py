@@ -26,13 +26,17 @@ class ImageSchema(Schema):
     @validates('size')
     def validate_size(self, size):
         if size < 64 and not self.is_power_of_two(size):
-            raise ValidationError("Size should be 64 or bigger and a power of 2")
+            raise ValidationError("size should be 64 or bigger and a power of 2")
 
+    @validates('guidance_scale')
+    def validate_size(self, guidance_scale):
+        if guidance_scale < 1:
+            raise ValidationError("guidance_scale should bebigger than 1")
 
     @validates('upsample_temp')
     def validate_upsample_temp(self, upsample_temp):
         if upsample_temp > 1 or upsample_temp < 0:
-            raise ValidationError("Upsample_temp should be between 0 and 1")
+            raise ValidationError("upsample_temp should be between 0 and 1")
 
 
 class ModelSchema(Schema):

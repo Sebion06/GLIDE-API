@@ -1,2 +1,4 @@
 app/__pycache__
 app/glide_model_cache
+app/static
+usage/*.html
