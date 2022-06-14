@@ -55,7 +55,7 @@ curl -X POST https://${ADDRESS}:${PORT}/upmodel?diffusion_steps=27
 
 `batch_size` - numarul de exemple imagini returnate, insa in format-ul unei singuri imagini `default=1 `
 
-`guidance_scale` - parametru care are efectul de a aplifica influenta semnalului de conditionare a imaginii `default=3.0`
+`guidance_scale` - parametru pentru aplificarea influentei semnalului de conditionare a imaginii `default=3.0`
 
 `upsample_temp` - parametru pentru a controla claritatea imaginii obtinute `default=0.997`
 
