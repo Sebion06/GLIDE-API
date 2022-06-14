@@ -8,6 +8,8 @@ Glide-Api reprezinta o solutie software web care este capabila sa produca compoz
 
 `./notebooks` : Jupyter notebook-ul oferit de echipa Open-AI, explicat prin comentarii
 
+`./samples` : imagini generate de model ca exemple, folosind parametrii de baza
+
 `./usage` : un exemplu de utilizare a aplicatiei pe partea de front-end
 
 
@@ -62,6 +64,9 @@ curl -X POST https://${ADDRESS}:${PORT}/upmodel?diffusion_steps=27
 #### Parametrii pentru POST request:
 
 `diffusion_steps` - OBLIGATORIU - numarul de pasi de difuzie al unui model
+
+`base_model_default=100`
+`upsample_model_default=27`
 
 
 ### Exemple rezultate API
