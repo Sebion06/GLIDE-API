@@ -1,6 +1,6 @@
 # Glide-Api
 
-Glide-Api reprezinta o solutie software web care este capabila sa produca compozitii grafice (imagini) intr-un mod automat, folosindu-se de modelul [Glide](https://gpt3demo.com/apps/openai-glide), creat de Open-AI. Utilizandu-se de modulul de python flask, aceasta prezinta o interfata web cu utilizatorul, dar si un REST-API care poate fi utilizat pentru crearea imaginilor in cadrul altor aplicatii software. 
+Glide-Api reprezinta o solutie software web care este capabila sa produca compozitii grafice intr-un mod automat, folosindu-se de modelul [Glide](https://gpt3demo.com/apps/openai-glide), creat de Open-AI. Utilizand modulul de python flask, aceasta prezinta o interfata web cu utilizatorul, dar si un REST-API care poate fi utilizat pentru crearea imaginilor in cadrul altor aplicatii software. 
 
 ## Continut
 
