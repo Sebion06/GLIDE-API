@@ -7,15 +7,7 @@ RUN apt-get install -y git
 RUN pip3 install --upgrade pip
 
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir \
-            Flask==2.1.2 \
-            Flask_RESTful==0.3.9 \
-            ipython==8.4.0 \
-            marshmallow==3.16.0 \
-            Pillow==9.1.1 \
-            gunicorn==20.1.0 \
-            torch==1.11.0  \
-            git+https://github.com/openai/glide-text2im
+RUN pip install -r requirements.txt
 
 EXPOSE 5000
 EXPOSE 8080
